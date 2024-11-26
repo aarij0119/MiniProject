@@ -149,4 +149,26 @@ app.post('/upload', upload.single('image'), isloggedin, async function (req, res
     res.redirect('/profile')
 });
 
+// all posts
+app.get('/allposts',isloggedin, async function(req,res){
+    const allposts = await userPost.find().populate('user').populate('likes')
+    //  console.log(allposts)
+    res.render('allposts',{allposts})
+})
+
+app.get('/profile/like/:id',isloggedin, async function(req,res){
+    const post = await userPost.findOne({ _id: req.params.id }).populate('user');
+    // console.log(post)
+    // console.log(req.user)
+    // console.log(req.user.userid)
+    if (post.likes.indexOf(req.user.userid) === -1) {
+        post.likes.push(req.user.userid)
+    } else {
+            post.likes.splice(post.likes.indexOf(req.user.userid), 1)
+        }
+    //   console.log(post.likes.push(post.user))
+    await post.save()
+    res.redirect('/allposts')
+})
+
 app.listen(3000)    
